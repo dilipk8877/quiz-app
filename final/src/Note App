@@ -1,0 +1,107 @@
+import React, { useEffect, useState } from 'react'
+import "../test/NotePad.css"
+
+const getdataItem = ()=>{
+  let list = localStorage.getItem('lists');
+  // console.log(list);
+
+  if(list){
+    return JSON.parse(localStorage.getItem('lists'))
+  }else{
+    return [];
+  }
+}
+
+const NotePad = () => {
+  const [inputdata, setInputData] = useState('');
+  const [item,setItem] = useState(getdataItem);
+  const [tooggleSubmit,setToggleSubmit] = useState(true);
+  const [isEdititem,setIsEditItem] = useState(null);
+
+  const additem = ()=>{
+    if(!inputdata){
+      alert('plz fill the data');
+    }
+    else if(inputdata && !tooggleSubmit){
+      const itemdata=item.map((val)=>{
+          if(val.id === isEdititem){
+            return {...val, name:inputdata}
+          }
+          return val;
+        })
+      setItem(
+          itemdata
+      )
+      setToggleSubmit(true)
+
+      setInputData('')
+  
+      setIsEditItem(null)
+    }
+    
+    else{
+      const allInputData = {id: new Date().getTime().toString(), name:inputdata}
+      setItem([...item,allInputData]);
+      localStorage.setItem('Lists', JSON.stringify([...item,allInputData]))
+      setInputData('')
+    }
+  }
+
+  const edit =(id)=>{
+    let newedititem = item.find((val)=>{
+      return val.id === id
+    })
+    console.log(newedititem);
+    setToggleSubmit(false)
+
+    setInputData(newedititem.name)
+
+    setIsEditItem(id)
+  }
+
+  const delet=(index)=>{
+    const updateditem = item.filter((val)=>{
+      return ( index !== val.id)
+    })
+    setItem(updateditem);
+  }
+
+  // useEffect (()=>{
+  //   localStorage.setItem('Lists', JSON.stringify(item))
+  // },[item])
+  return (
+    <>
+    <div className="main">
+        <div className="additem">
+            <input type="text" placeholder='add item'  value={inputdata} onChange={(e)=>setInputData(e.target.value)} />
+            {
+              tooggleSubmit ? <button onClick={additem}>Add</button> : 
+              <button onClick={additem}>edit</button>
+            }
+            
+        </div>
+        <div className="show">
+          {
+            item.map((val)=>{
+              return(
+                  <div key={val.id} className="each">
+                     <h3>{val.name}</h3>
+                     <div>
+                     <button onClick={()=>edit(val.id)}>edit</button>
+                     <button onClick={()=>delet(val.id)}>Del</button>
+                     </div>
+                </div>
+              )
+            })
+          }
+         
+        </div>
+        {/* <div className="kuv">
+          <button className='btn effect04' data-sm-link-text="remove all"> <span>Remove all</span></button>
+        </div> */}
+    </div>
+    </>
+  )
+}
+
+export default NotePad;
